@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>McClelland 욕구 이론 기반 자가 진단</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --konkuk-blue: #00467F;
+            --konkuk-gold: #D5A94D;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--konkuk-blue);
+            margin: 0;
+            font-size: 1.8em;
+        }
+
+        #survey-form, #results {
+            display: none;
+        }
+
+        .question {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+
+        .question p {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: var(--konkuk-blue);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .rating-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .star-rating-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 600px;
+            gap: 20px;
+        }
+
+        .scale-label {
+            color: #666;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .star-rating {
+            display: flex;
+            flex-direction: row-reverse;
+            gap: 8px;
+        }
+
+        .star-rating input {
+            display: none;
+        }
+
+        .star-rating label {
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23ccc" stroke="%23999" stroke-width="0.3" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            transition: transform 0.2s ease;
+        }
+
+        .star-rating input:checked ~ label {
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23FFD700" stroke="%23999" stroke-width="0.3" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>');
+        }
+
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23FFD700" stroke="%23999" stroke-width="0.3" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>');
+            transform: scale(1.1);
+        }
+
+        .button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        button {
+            background-color: var(--konkuk-blue);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 0 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #003666;
+        }
+
+        button.secondary {
+            background-color: var(--konkuk-gold);
+        }
+
+        button.secondary:hover {
+            background-color: #b38d3f;
+        }
+
+        .scale-description {
+            text-align: left;
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            line-height: 1.6;
+        }
+
+        .scale-description p {
+            margin: 5px 0;
+        }
+
+        .emphasis {
+            font-weight: bold;
+            color: var(--konkuk-blue);
+        }
+
+        #radar-chart {
+            max-width: 800px;
+            height: 600px;
+            margin: 20px auto;
+        }
+
+        .result-scores {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.1em;
+        }
+
+        .result-scores p {
+            margin: 10px 0;
+        }
+
+        .emphasis-text {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: var(--konkuk-blue);
+            text-align: center;
+            margin: 30px 0;
+            padding: 25px;
+            border: 2px solid var(--konkuk-blue);
+            border-radius: 12px;
+            background-color: rgba(0, 70, 127, 0.05);
+            line-height: 1.6;
+        }
+
+        #start-screen p {
+            font-size: 1.1em;
+            color: #333;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <p>건국대학교 조직행동론 (홍운기 교수)</p>
+            <h1>McClelland 욕구 이론 기반 자가 진단</h1>
+        </header>
+
+        <div id="start-screen">
+            <br>
+            <p>이 진단은 총 12개의 문항으로 구성되어 있으며, 약 5-10분 정도 소요됩니다.</p>
+            <p class="emphasis-text">현재 자신의 진짜 속마음과 행동을 표현하는 것으로 응답해 주세요.</p>
+            <div class="button-container">
+                <button onclick="startSurvey()">진단 시작</button>
+            </div>
+        </div>
+
+        <div id="survey-form"></div>
+
+        <div id="results">
+            <h2>진단 결과</h2>
+            <div class="result-scores" id="result-scores"></div>
+            <canvas id="radar-chart"></canvas>
+            <div class="button-container">
+                <button onclick="restartSurvey()" class="secondary">처음으로</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="logic.js"></script>
+</body>
+</html> 
